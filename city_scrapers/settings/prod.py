@@ -1,6 +1,6 @@
 from .base import *
 
-USER_AGENT = 'City Scrapers [production mode]. Learn more and say hello at https://citybureau.org/city-scrapers'
+USER_AGENT = 'City Scrapers [production mode]. Learn more and say hello at https://cityscrapers.org'
 
 # Configure item pipelines
 ITEM_PIPELINES = {
@@ -8,6 +8,10 @@ ITEM_PIPELINES = {
     "city_scrapers_core.pipelines.AzureDiffPipeline": 300,
     "city_scrapers_core.pipelines.MeetingPipeline": 400,
     "city_scrapers_core.pipelines.JSCalendarPipeline": 500,
+}
+
+SPIDER_MIDDLEWARES = {
+    "city_scrapers.middleware.CityScrapersWaybackMiddleware": 500,
 }
 
 EXTENSIONS = {
