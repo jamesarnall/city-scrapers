@@ -1,6 +1,7 @@
 from city_scrapers_core.constants import NOT_CLASSIFIED
 from city_scrapers_core.items import Meeting
 from city_scrapers_core.spiders import CityScrapersSpider
+import re
 
 
 class IlSportsFacilitiesAuthoritySpider(CityScrapersSpider):
@@ -17,7 +18,10 @@ class IlSportsFacilitiesAuthoritySpider(CityScrapersSpider):
         Change the `_parse_id`, `_parse_name`, etc methods to fit your scraping
         needs.
         """
-        for item in response.css(".meetings"):
+
+        listings = response.css('h2:contains("Meetings and Agendas") ~ p')
+
+        for item in listings:
             meeting = Meeting(
                 title=self._parse_title(item),
                 description=self._parse_description(item),
@@ -31,8 +35,8 @@ class IlSportsFacilitiesAuthoritySpider(CityScrapersSpider):
                 source=self._parse_source(response),
             )
 
-            meeting["status"] = self._get_status(meeting)
-            meeting["id"] = self._get_id(meeting)
+            # meeting["status"] = self._get_status(meeting)
+            # meeting["id"] = self._get_id(meeting)
 
             yield meeting
 
@@ -78,3 +82,18 @@ class IlSportsFacilitiesAuthoritySpider(CityScrapersSpider):
     def _parse_source(self, response):
         """Parse or generate source."""
         return response.url
+
+    # 
+    # Pulls text for the <p> containing the list of meetings
+    def _get_paragraph_of_meetings(self, response):
+        listings = response.css('h2:contains("Meetings and Agendas") ~ p').getall()
+        para = listings[1].replace('<p>', '').replace('</p>', '')
+        return para
+
+    #
+    # Parses paragraph text and returns a list of HTML strings defining each meeting
+    def _get_meetings_from_paragraph(self, txt):
+        lines_of_text = txt.replace('<br>', '')
+        return lines_of_text.split('\n')
+        # return []
+
