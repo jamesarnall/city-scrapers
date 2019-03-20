@@ -5,6 +5,7 @@ import pytest
 from freezegun import freeze_time
 from city_scrapers_core.constants import NOT_CLASSIFIED
 from city_scrapers_core.utils import file_response
+from city_scrapers_core.items import Meeting
 
 from city_scrapers.spiders.il_sports_facilities_authority import IlSportsFacilitiesAuthoritySpider
 
@@ -45,6 +46,7 @@ Construction Committee 5.13.2013 <a href="http://236c3m49r38mg7ixa39zqru1-wpengi
 Special Board Meeting 5.21.2013 <a href="http://236c3m49r38mg7ixa39zqru1-wpengine.netdna-ssl.com/assets/agenda_5.12.pdf">Agenda</a><br>
 Audit, Finance &amp; Investment Committee Meeting 6.6.2013 <a href="http://236c3m49r38mg7ixa39zqru1-wpengine.netdna-ssl.com/assets/agenda-6-6-13.pdf">Agenda</a>"""
 
+test_meeting_txt = 'Board Meeting 12.8.2014 <a href="http://236c3m49r38mg7ixa39zqru1-wpengine.netdna-ssl.com/wp-content/uploads/2016/07/12.8.14-Agenda.pdf">Agenda</a> &amp; <a href="http://236c3m49r38mg7ixa39zqru1-wpengine.netdna-ssl.com/wp-content/uploads/2016/07/12-8-14-Board-Minutes_Redacted.pdf">Minutes</a><br>'
 
 freezer = freeze_time("2019-02-08")
 freezer.start()
@@ -69,10 +71,22 @@ def test_get_paragraph_of_meetings():
     assert para == test_para
 
 def test_get_list_of_meetings_from_inner_paragraph():
-    meetings = spider._get_meetings_from_paragraph(test_para);
+    meetings = spider._get_meetings_from_paragraph(test_para)
     assert len(meetings) == 30
 
 
+def test_parse_title():
+    title = spider._parse_title(test_meeting_txt)
+    assert title == 'Board Meeting'
+
+def test_parse_date():
+    meeting_date = spider._parse_date(test_meeting_txt)
+    assert meeting_date.date().isoformat() == '2014-12-08'
+
+def test_parse_meeting():
+    meeting = spider._parse_meeting(test_meeting_txt)
+    assert meeting['title'] == 'Board Meeting'
+    assert meeting['start'].date().isoformat() == '2014-12-08'
 # def test_get_correct_no_of_items():
 #     assert len(parsed_items) == 30
 
